@@ -5,41 +5,98 @@ namespace MuzzleFork;
 class Timer
 {
 	private static $timers = array();
+	private $key;
+	private $events;
+	private $is_active;
+	private $total = 0;
 
-	public static function start($key)
+	public static function create($key)
 	{
-		self::$timers[$key] = array(
-			'start' => microtime(true),
-			'key' => $key,
-			'events' => array(),
-			'is_active' => true
-			);
-		self::$record($key, 'start');
+		$timer = new self($key);
+		self::$timers[$key] = $timer;
+		return $timer;
 	}
 
-	public static function record($key, $event)
+	public static function get($key)
 	{
 		if (!isset(self::$timers[$key]))
 		{
-			throw new Exception('Non-existent key specified');
+			return self::create($key);
 		}
-		$time_since_last = 0;
-		$now = microtime(true);
-		if (count(self::$timers[$key]['events']) > 0)
-		{
-			$current = self::$timers[$key]['events'][count(self::$timers[$key]['events'])];
-			$time_since_last = $now - $current['microtime'];
-		}
+		return self::$timers[$key];
 	}
 
-	public function __construct()
+	public function __construct($key)
 	{
-		echo "Started a timer\n";
+		$this->key = $key;
+		$this->events = array();
+		$this->is_active = false;
+		$this->total = 0;
+		// $this->start();
+	}
 
+	public function start()
+	{
+		if (count($this->events) > 0)
+		{
+			// throw new \Exception('Timer is already started');
+		}
+
+		$this->resume('start');
+	}
+
+	public function resume($message)
+	{
+		if ($this->is_active)
+		{
+			// throw new \Exception('Timer is already active');
+		}
+		$this->is_active = true;
+		$this->record($message);
+	}
+
+	public function pause($message)
+	{
+		if (!$this->is_active)
+		{
+			// throw new Exception('Timer is not active');
+		}
+		$this->is_active = false;
+		$this->record($message);
+	}
+
+	public function getTotal()
+	{
+		return $this->total;
+	}
+
+	public function record($message)
+	{
+		$now = microtime(true);
+		if (count($this->events) > 0)
+		{
+			$current = $this->events[count($this->events) - 1];
+			$time_since_last = $now - $current['microtime'];
+			if ($this->events[count($this->events) - 1]['is_active'])
+			{
+				$this->total += $time_since_last;
+			}
+		}
+		$this->events[] = array(
+			'pretty_time' => date('Y-m-d H:i:s'),
+			'microtime' => $now,
+			'message' => $message,
+			'is_active' => $this->is_active
+
+			);
 	}
 
 	public function __destruct()
 	{
-		echo "Timer got destroyed\n";
+		if ($this->is_active)
+		{
+			$this->pause('timer destroyed');
+		}
+		print_r($this->events);
 	}
 }
