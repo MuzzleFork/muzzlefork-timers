@@ -17,6 +17,11 @@ class Timer
 		return $timer;
 	}
 
+	public static function getAllTimers()
+	{
+		return self::$timers;
+	}
+
 	public static function get($key)
 	{
 		if (!isset(self::$timers[$key]))
