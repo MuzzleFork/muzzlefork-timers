@@ -45,7 +45,7 @@ class Timer
 		$this->resume('start');
 	}
 
-	public function resume($message)
+	public function resume($message = '')
 	{
 		if ($this->is_active)
 		{
@@ -55,7 +55,7 @@ class Timer
 		$this->record($message);
 	}
 
-	public function pause($message)
+	public function pause($message = '')
 	{
 		if (!$this->is_active)
 		{
@@ -70,7 +70,7 @@ class Timer
 		return $this->total;
 	}
 
-	public function record($message)
+	public function record($message = '')
 	{
 		$now = microtime(true);
 		if (count($this->events) > 0)
