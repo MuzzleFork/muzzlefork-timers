@@ -97,6 +97,5 @@ class Timer
 		{
 			$this->pause('timer destroyed');
 		}
-		print_r($this->events);
 	}
 }
